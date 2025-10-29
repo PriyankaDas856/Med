@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+	height: 100%;
+}
+
+body {
+	/* Smooth blue gradient background */
+	background: linear-gradient(140deg, #0f172a 0%, #0b3b8c 40%, #1e88e5 75%, #38bdf8 100%);
+	background-attachment: fixed;
+}
+
+/* Glass morph utility */
+.glass { /* medium translucent blue card */
+	@apply backdrop-blur-md shadow-card;
+	background-color: rgba(30, 58, 138, 0.2); /* blue-800/20 */
+	border: 1px solid rgba(59, 130, 246, 0.25); /* blue-500/25 */
+}
+
+.glass-light { /* light blue surface for forms/cards with dark text */
+	@apply backdrop-blur-md shadow-card;
+	background-color: rgba(191, 219, 254, 0.85); /* blue-200/85 */
+	border: 1px solid rgba(147, 197, 253, 0.7); /* blue-300/70 */
+}
+
+.glass-dark { /* dark blue surface for nav/footer with light text */
+	@apply backdrop-blur-md shadow-card;
+	background-color: rgba(23, 37, 84, 0.6); /* blue-950 ~ navy */
+	border: 1px solid rgba(30, 64, 175, 0.6); /* blue-700/60 */
+}
+
+/* Fancy focus ring */
+.focus-glow:focus {
+	box-shadow: 0 0 0 3px rgba(59,130,246,0.35), 0 10px 30px rgba(59,130,246,0.28);
+}
+
+
