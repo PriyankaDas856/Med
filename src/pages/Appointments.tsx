@@ -1,42 +1,53 @@
 import { useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/Navbar';
-import { Appointment, Doctor, listAppointments, listDoctors, saveAppointment, searchDoctors } from '../lib/appointmentsService';
+import { Appointment, Doctor, listAppointmentsFor, listDoctors, saveAppointmentFor, searchDoctors } from '../lib/appointmentsService';
 import DoctorCard from '../components/DoctorCard';
 import BookingForm from '../components/BookingForm';
 import AppointmentsList from '../components/AppointmentsList';
 import { useNavigate } from 'react-router-dom';
-import { apiMe } from '../lib/api';
+import { apiMe, type ApiUser } from '../lib/api';
 
 export default function AppointmentsPage() {
 	const [query, setQuery] = useState('');
 	const [spec, setSpec] = useState('All');
 	const [doctors, setDoctors] = useState<Doctor[]>(listDoctors());
 	const [selected, setSelected] = useState<Doctor | null>(null);
-	const [bookings, setBookings] = useState<Appointment[]>([]);
+    const [bookings, setBookings] = useState<Appointment[]>([]);
 	const [toast, setToast] = useState<string | null>(null);
+    const [user, setUser] = useState<ApiUser | null>(null);
 	const navigate = useNavigate();
 
-	useEffect(() => {
-		apiMe().then(u => { if (!u) navigate('/auth'); });
-		setBookings(listAppointments());
-	}, [navigate]);
+    useEffect(() => {
+        apiMe().then(u => {
+            if (!u) {
+                navigate('/auth');
+                return;
+            }
+            setUser(u);
+            setBookings(listAppointmentsFor(u.id));
+        });
+    }, [navigate]);
 
 	useEffect(() => {
 		const result = searchDoctors(query, spec);
 		setDoctors(result);
 	}, [query, spec]);
 
-	function onBooked(data: { date: string; time: string; notes: string }) {
+    function onBooked(data: { date: string; time: string; notes: string; type: 'Online' | 'Offline' }) {
 		if (!selected) return;
-		const appt = saveAppointment({
+        if (!user) return;
+        const appt = saveAppointmentFor(user.id, {
 			doctorId: selected.id,
 			doctorName: selected.name,
 			specialization: selected.specialization,
 			date: data.date,
 			time: data.time,
-			notes: data.notes,
+            notes: data.notes,
+            type: data.type,
+            patientId: user.id,
+            patientName: user.name || user.email,
 		});
-		setBookings(prev => [appt, ...prev]);
+        setBookings(prev => [appt, ...prev]);
 		setToast('Appointment booked successfully');
 		setSelected(null);
 		setTimeout(() => setToast(null), 1500);
@@ -62,9 +73,9 @@ export default function AppointmentsPage() {
 					))}
 				</div>
 
-				{selected && (
+                {selected && (
 					<div className="mt-6">
-						<BookingForm doctor={selected} onSubmit={onBooked} />
+                        <BookingForm doctor={selected} patientName={user?.name || user?.email} onSubmit={onBooked} />
 					</div>
 				)}
 

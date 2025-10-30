@@ -9,7 +9,8 @@ export default function AppointmentsList({ items }: { items: Appointment[] }) {
 					<p className="text-xs text-blue-700">{a.status.toUpperCase()}</p>
 					<h4 className="mt-1 font-semibold text-blue-900">{a.doctorName}</h4>
 					<p className="text-blue-800 text-sm">{a.specialization}</p>
-					<p className="text-blue-800 text-sm mt-2">{a.date} • {a.time}</p>
+                    <p className="text-blue-800 text-sm mt-2">{a.date} • {a.time}</p>
+                    {a.type && <p className="text-blue-800 text-sm mt-1">Type: {a.type}</p>}
 				</div>
 			))}
 		</div>

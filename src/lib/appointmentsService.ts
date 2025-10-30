@@ -14,6 +14,9 @@ export type Appointment = {
 	date: string; // YYYY-MM-DD
 	time: string; // e.g. 10:00 AM
 	notes?: string;
+    type?: 'Online' | 'Offline';
+    patientId?: string; // user id/email
+    patientName?: string;
 	status: 'upcoming' | 'completed' | 'cancelled';
 };
 
@@ -26,6 +29,8 @@ const DOCTORS: Doctor[] = [
 ];
 
 const KEY = 'medpass_appointments';
+const KEY_PREFIX = 'medpass_appointments_';
+function keyFor(userId: string) { return `${KEY_PREFIX}${userId}`; }
 
 export function listDoctors(): Doctor[] {
 	return DOCTORS;
@@ -53,6 +58,24 @@ export function saveAppointment(appt: Omit<Appointment, 'id' | 'status'>): Appoi
 	const full: Appointment = { id: randomId(), status: 'upcoming', ...appt };
 	localStorage.setItem(KEY, JSON.stringify([full, ...current]));
 	return full;
+}
+
+export function listAppointmentsFor(userId: string): Appointment[] {
+    if (!userId) return [];
+    try {
+        const raw = localStorage.getItem(keyFor(userId));
+        return raw ? (JSON.parse(raw) as Appointment[]) : [];
+    } catch {
+        return [];
+    }
+}
+
+export function saveAppointmentFor(userId: string, appt: Omit<Appointment, 'id' | 'status'>): Appointment {
+    if (!userId) throw new Error('Missing user');
+    const current = listAppointmentsFor(userId);
+    const full: Appointment = { id: randomId(), status: 'upcoming', ...appt };
+    localStorage.setItem(keyFor(userId), JSON.stringify([full, ...current]));
+    return full;
 }
 
 function randomId(): string {
